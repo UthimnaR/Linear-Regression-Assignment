@@ -1,42 +1,33 @@
+use burn::tensor::{Tensor};
 use burn_ndarray::NdArray;
-use burn::{
-    tensor::{Tensor},
-    optim::{Adam as OtherAdam, Optimizer},
-};
+use burn::optimizer::{SGD};
+use burn::ops::{Add, Mul, Mean};
 
-use crate::model::LinearRegression;
-
-struct Adam<'a>(&'a LinearRegression, f32);
-
-impl<'a> Adam<'a> {
-    fn new(p0: &LinearRegression, p1: f32) -> _ {
-        todo!()
-    }
+// Mean Squared Error Loss function
+fn mean_squared_error(pred: &NdArray<f32>, target: &NdArray<f32>) -> NdArray<f32> {
+    (pred - target).powi(2).mean().reshape([1])  // MSE = (y_pred - y_true)^2
 }
 
-struct Tensor(Vec<f32>);
-
-pub fn train_model(x_train: Vec<f32>, y_train: Vec<f32>, epochs: usize, lr: f32) -> LinearRegression {
-    let mut model = LinearRegression::new();
-    let mut optimizer = Adam::new(&model, lr);
-
-    let x_train_tensor = Tensor::<NdArray, 1>::from_floats(x_train);
-    let y_train_tensor = Tensor::<NdArray, 1>::from_floats(y_train);
+pub fn train(model: &mut super::model::LinearRegression, inputs: &NdArray<f32>, targets: &NdArray<f32>, epochs: usize, learning_rate: f32) {
+    let mut optimizer = SGD::default().learning_rate(learning_rate);
 
     for epoch in 0..epochs {
-        let y_pred = model.forward(x_train_tensor.clone());
-        let loss = (y_pred.clone() - y_train_tensor.clone()).powf(2.0).mean(); // Mean Squared Error
+        // Forward pass
+        let predictions = model.forward(inputs);
 
-        optimizer.update(&mut model, loss.clone());
+        // Compute loss
+        let loss = mean_squared_error(&predictions, targets);
 
+        // Backward pass
+        loss.backward();
+
+        // Update weights and bias
+        optimizer.step(&mut model.weights);
+        optimizer.step(&mut model.bias);
+
+        // Print loss every 10 epochs
         if epoch % 10 == 0 {
-            println!("Epoch {}: Loss = {:?}", epoch, loss.into_scalar());
+            println!("Epoch {}: Loss = {}", epoch, loss);
         }
     }
-
-    model
-}
-
-fn NdArray(p0: Vec<f32>) -> _ {
-    todo!()
 }

@@ -1,26 +1,24 @@
 
-use burn::prelude::{Tensor, TensorData, Module};
-use burn_ndarray::{NdArray, NdArrayDevice};
+use burn::tensor::{Tensor};
+use burn_ndarray::NdArray;
 
-#[derive(Module, Debug, Clone)]
 pub struct LinearRegression {
-    weights: Tensor<NdArray, 1>,
-    bias: Tensor<NdArray, 1>,
+    weights: Tensor<NdArray, f32>,
+    bias: Tensor<NdArray, f32>,
 }
 
 impl LinearRegression {
     pub fn new() -> Self {
-        // Create a device for NdArray computation (e.g., CPU).
-        let device = NdArrayDevice::default();
-
-        // Initialize weights and bias with the device.
-        let weights = Tensor::from_floats([2.2], &device); // Provide the device
-        let bias = Tensor::from_floats([0.0], &device);    // Provide the device
-
-        Self { weights, bias }
+        let weights = Tensor::from(NdArray::from(vec![0.0]));  // Initialize weights to 0
+        let bias = Tensor::from(NdArray::from(vec![0.0]));     // Initialize bias to 0
+        LinearRegression { weights, bias }
     }
 
-    pub fn forward(&self, x: Tensor<NdArray, 1>) -> Tensor<NdArray, 1> {
-        self.weights.clone() * x + self.bias.clone()
+    pub fn forward(&self, inputs: &NdArray<f32>) -> NdArray<f32> {
+        inputs * &self.weights + &self.bias
+    }
+
+    pub fn predict(&self, inputs: &NdArray<f32>) -> f32 {
+        self.forward(inputs).into_inner()[0]
     }
 }
