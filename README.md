@@ -1,4 +1,3 @@
- Introduction
 This project implements a simple linear regression model in Rust using the Burn library, a machine learning framework. The model predicts the output of the function y = 2x + 1 based on synthetic training data. The aim is to explore the usage of the Burn library for building machine learning models and to demonstrate how linear regression can be applied in a basic machine learning task.
 The model is trained with synthetic data, and the training process involves monitoring the loss function (Mean Squared Error) to ensure that the model converges towards a solution.
 
